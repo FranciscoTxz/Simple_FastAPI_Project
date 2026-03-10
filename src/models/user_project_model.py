@@ -11,8 +11,8 @@ if TYPE_CHECKING:
 
 class UserProject(DatabaseConnection().get_base()):
     __tablename__ = "users_projects"
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"), primary_key=True, nullable=False
+    user_email: Mapped[str] = mapped_column(
+        ForeignKey("users.email"), primary_key=True, nullable=False
     )
     project_id: Mapped[int] = mapped_column(
         ForeignKey("projects.id"), primary_key=True, nullable=False

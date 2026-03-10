@@ -17,7 +17,7 @@ class DocumentService:
         if not db_document:
             raise HTTPException(status_code=404, detail="Document not found")
         db_user_project = await UserProjectCRUD.is_project_from_user(
-            db, user.id, db_document.project_id
+            db, user.email, db_document.project_id
         )
         if not db_user_project:
             raise HTTPException(status_code=404, detail="Document not found")
@@ -34,7 +34,7 @@ class DocumentService:
         if not db_document:
             raise HTTPException(status_code=404, detail="Document not found")
         db_user_project = await UserProjectCRUD.is_project_from_user(
-            db, user.id, db_document.project_id
+            db, user.email, db_document.project_id
         )
         if not db_user_project:
             raise HTTPException(status_code=404, detail="Document not found")
@@ -52,7 +52,7 @@ class DocumentService:
         if not db_document:
             raise HTTPException(status_code=404, detail="Document not found")
         db_user_project = await UserProjectCRUD.is_project_from_user(
-            db, user.id, db_document.project_id
+            db, user.email, db_document.project_id
         )
         if not db_user_project:
             raise HTTPException(status_code=404, detail="Document not found")

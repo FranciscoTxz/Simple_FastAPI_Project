@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, EmailStr
 from fastapi import HTTPException
 import re
 
@@ -9,7 +9,7 @@ PASSWORD_REJECT = "Password must contain uppercase letters, lowercase letters, n
 
 
 class UserBase(BaseModel):
-    name: str = Field(..., min_length=2, max_length=50)
+    email: EmailStr
     password: str = Field(..., min_length=8, max_length=16)
 
     @field_validator("password")

@@ -6,18 +6,13 @@ from schemas.user_schema import UserCreate
 
 class UserCRUD:
     @staticmethod
-    async def get_user_by_name(db: AsyncSession, name: str):
-        result = await db.execute(select(User).where(User.name == name))
-        return result.scalars().first()
-
-    @staticmethod
-    async def get_user_by_id(db: AsyncSession, user_id: int):
-        result = await db.execute(select(User).where(User.id == user_id))
+    async def get_user_by_email(db: AsyncSession, email: str):
+        result = await db.execute(select(User).where(User.email == email))
         return result.scalars().first()
 
     @staticmethod
     async def create_user(db: AsyncSession, user: UserCreate):
-        db_user = User(name=user.name, password=user.password)
+        db_user = User(email=user.email, password=user.password)
         db.add(db_user)
         await db.commit()
         await db.refresh(db_user)
