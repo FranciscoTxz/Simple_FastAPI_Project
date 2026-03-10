@@ -5,13 +5,13 @@ info:
 
 http:
   method: POST
-  url: "{{URL}}/project/2/invite?user_id=2"
+  url: "{{URL}}/project/1/invite?user_email=ramonmtz@hot.com"
   headers:
     - name: authorization
       value: "{{TOKEN}}"
   params:
-    - name: user_id
-      value: "2"
+    - name: user_email
+      value: ramonmtz@hot.com
       type: query
 
 settings:

@@ -36,13 +36,12 @@ async def authentication_user(
             status_code=401, detail="Unauthorized: Missing or invalid token"
         )
 
-    user_id = payload.get("user_id")
-    username = payload.get("username")
-    if not user_id or not username:
+    email = payload.get("email")
+    if not email:
         raise HTTPException(
             status_code=401, detail="Unauthorized: Missing or invalid token"
         )
-    user = await UserCRUD.get_user_by_name(db, username)
+    user = await UserCRUD.get_user_by_email(db, email)
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized: User not found")
     return user
