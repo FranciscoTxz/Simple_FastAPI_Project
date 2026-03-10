@@ -1,0 +1,17 @@
+info:
+  name: get project documents
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: "{{URL}}/project/1/documents"
+  headers:
+    - name: authorization
+      value: "{{TOKEN}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

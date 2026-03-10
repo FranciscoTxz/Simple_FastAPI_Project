@@ -1,0 +1,21 @@
+info:
+  name: invite user to project
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{URL}}/project/2/invite?user_id=2"
+  headers:
+    - name: authorization
+      value: "{{TOKEN}}"
+  params:
+    - name: user_id
+      value: "2"
+      type: query
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

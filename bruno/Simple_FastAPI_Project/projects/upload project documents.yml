@@ -1,0 +1,24 @@
+info:
+  name: upload project documents
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{URL}}/project/1/documents"
+  headers:
+    - name: authorization
+      value: "{{TOKEN}}"
+  body:
+    type: multipart-form
+    data:
+      - name: file
+        type: file
+        value:
+          - C:\Users\AngelTorres\Downloads\phrase_bank.pdf
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

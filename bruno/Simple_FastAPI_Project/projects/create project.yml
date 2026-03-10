@@ -1,0 +1,24 @@
+info:
+  name: create project
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{URL}}/projects"
+  headers:
+    - name: authorization
+      value: "{{TOKEN}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Super project 1",
+        "description": "A super project 3"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

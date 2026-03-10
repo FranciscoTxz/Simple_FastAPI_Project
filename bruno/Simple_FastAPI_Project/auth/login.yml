@@ -1,0 +1,29 @@
+info:
+  name: login
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{URL}}/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Angel Torres",
+        "password": "PassWord123@"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        var jsonData = res.getBody();
+        bru.setEnvVar("TOKEN", jsonData.access_token);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

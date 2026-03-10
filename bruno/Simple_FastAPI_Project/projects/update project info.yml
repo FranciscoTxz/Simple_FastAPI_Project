@@ -1,0 +1,24 @@
+info:
+  name: update project info
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{URL}}/project/2/info"
+  headers:
+    - name: authorization
+      value: "{{TOKEN}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Super project 2",
+        "description": "A super project 2"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

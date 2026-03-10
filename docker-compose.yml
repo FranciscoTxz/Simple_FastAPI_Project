@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db_simple_fastapi_project
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api_handler:
+    container_name: simple_fastapi_project
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
