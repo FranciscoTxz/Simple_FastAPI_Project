@@ -1,7 +1,11 @@
 from commons.constants import DATABASE_URL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 from typing import AsyncGenerator
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 class DatabaseConnection:
@@ -28,7 +32,7 @@ class DatabaseConnection:
         self.AsyncSessionLocal = async_sessionmaker(
             self.engine, class_=AsyncSession, expire_on_commit=False, autoflush=False
         )
-        self.Base = declarative_base()
+        self.Base = Base
         self._initialized = True
 
     async def connect(self):
@@ -45,5 +49,5 @@ class DatabaseConnection:
     async def disconnect(self):
         await self.engine.dispose()
 
-    def get_base(self):
+    def get_base(self) -> type[Base]:
         return self.Base
