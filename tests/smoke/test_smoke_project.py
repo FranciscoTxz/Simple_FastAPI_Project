@@ -1,5 +1,45 @@
 import io
 import base64
+from pytest import fixture
+
+PDF_CONTENT = (
+    b"%PDF-1.4\n"
+    b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+    b"2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
+    b"3 0 obj<</Type/Page/MediaBox[0 0 612 792]>>endobj\n"
+    b"xref\n0 4\n"
+    b"0000000000 65535 f \n"
+    b"0000000009 00000 n \n"
+    b"0000000058 00000 n \n"
+    b"0000000115 00000 n \n"
+    b"trailer<</Size 4/Root 1 0 R>>\n"
+    b"startxref\n196\n%%EOF\n"
+)
+
+
+@fixture
+def created_project_id(user_1_client):
+    """Fixture que crea un proyecto y devuelve su ID"""
+    response = user_1_client.post(
+        "/projects",
+        json={"name": "Super project", "description": "A super project"},
+    )
+    assert response.is_success
+    return response.json()["message"].split("ID: ")[1]
+
+
+@fixture
+def uploaded_project_document(user_1_client, created_project_id):
+    """Fixture que crea un proyecto con un documento y devuelve ambos IDs"""
+    response_doc = user_1_client.post(
+        f"/project/{created_project_id}/documents",
+        files={"file": ("document_1.pdf", io.BytesIO(PDF_CONTENT), "application/pdf")},
+    )
+    assert response_doc.is_success
+    return {
+        "project_id": created_project_id,
+        "document_id": response_doc.json()["id"],
+    }
 
 
 def test_create_project_success(user_1_client):
@@ -82,20 +122,12 @@ def test_create_project_validation_error(user_1_client):
     assert response_2.status_code == 400
 
 
-def test_get_project_info_success(user_1_client):
+def test_get_project_info_success(user_1_client, created_project_id):
     """Test that get project info endpoint works with valid credentials"""
     name = "Super project"
     description = "A super project"
 
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
-    response_2 = user_1_client.get(f"/project/{id}/info")
+    response_2 = user_1_client.get(f"/project/{created_project_id}/info")
 
     assert response_2.is_success
     assert response_2.json()["name"] == name
@@ -110,24 +142,13 @@ def test_get_project_info_not_found(user_1_client):
     assert response_2.status_code == 404
 
 
-def test_update_project_success(user_1_client):
+def test_update_project_success(user_1_client, created_project_id):
     """Test that update project endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
     new_name = "Super project updated"
     new_description = "A super project updated"
 
     response_2 = user_1_client.put(
-        f"/project/{id}/info",
+        f"/project/{created_project_id}/info",
         json={"name": new_name, "description": new_description},
     )
 
@@ -136,50 +157,30 @@ def test_update_project_success(user_1_client):
     assert response_2.json()["description"] == new_description
 
 
-def test_update_project_from_another_user(user_1_client, user_2_client, user_2_info):
+def test_update_project_from_another_user(
+    user_1_client, user_2_client, user_2_info, created_project_id
+):
     new_name = "Super project updated"
     new_description = "A super project updated"
 
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
     response_2 = user_1_client.post(
-        f"/project/{id}/invite",
+        f"/project/{created_project_id}/invite",
         params={"user_email": user_2_info["email"]},
     )
 
     assert response_2.is_success
 
     response = user_2_client.put(
-        f"/project/{id}/info",
+        f"/project/{created_project_id}/info",
         json={"name": new_name, "description": new_description},
     )
 
     assert response.status_code == 404
 
 
-def test_delete_project_success(user_1_client):
+def test_delete_project_success(user_1_client, created_project_id):
     """Test that delete project endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
-    response_2 = user_1_client.delete(f"/project/{id}")
+    response_2 = user_1_client.delete(f"/project/{created_project_id}")
 
     assert response_2.status_code == 204
 
@@ -191,147 +192,65 @@ def test_delete_project_not_found(user_1_client):
     assert response.status_code == 404
 
 
-def test_delete_project_not_owner(user_1_client, user_2_client, user_2_info):
+def test_delete_project_not_owner(
+    user_1_client, user_2_client, user_2_info, created_project_id
+):
     """Test that delete project endpoint works with valid credentials and project not found"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
     response_2 = user_1_client.post(
-        f"/project/{id}/invite",
+        f"/project/{created_project_id}/invite",
         params={"user_email": user_2_info["email"]},
     )
 
     assert response_2.is_success
 
-    response_3 = user_2_client.delete(f"/project/{id}")
+    response_3 = user_2_client.delete(f"/project/{created_project_id}")
 
     assert response_3.status_code == 404
 
 
-def test_create_project_document_success(user_1_client):
+def test_create_project_document_success(user_1_client, created_project_id):
     """Test that create project document endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
-    file_content = (
-        b"%PDF-1.4\n"
-        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
-        b"2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
-        b"3 0 obj<</Type/Page/MediaBox[0 0 612 792]>>endobj\n"
-        b"xref\n0 4\n"
-        b"0000000000 65535 f \n"
-        b"0000000009 00000 n \n"
-        b"0000000058 00000 n \n"
-        b"0000000115 00000 n \n"
-        b"trailer<</Size 4/Root 1 0 R>>\n"
-        b"startxref\n196\n%%EOF\n"
-    )
     file_name = "document_1.pdf"
     response_2 = user_1_client.post(
-        f"/project/{id}/documents",
-        files={"file": (file_name, io.BytesIO(file_content), "application/pdf")},
+        f"/project/{created_project_id}/documents",
+        files={"file": (file_name, io.BytesIO(PDF_CONTENT), "application/pdf")},
     )
 
     assert response_2.is_success
     assert response_2.json()["name"] == file_name
-    assert response_2.json()["content"] == base64.b64encode(file_content).decode()
+    assert response_2.json()["content"] == base64.b64encode(PDF_CONTENT).decode()
 
 
 def test_create_project_document_not_found(user_1_client):
     """Test that create project document endpoint works with valid credentials"""
-
-    file_content = (
-        b"%PDF-1.4\n"
-        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
-        b"2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
-        b"3 0 obj<</Type/Page/MediaBox[0 0 612 792]>>endobj\n"
-        b"xref\n0 4\n"
-        b"0000000000 65535 f \n"
-        b"0000000009 00000 n \n"
-        b"0000000058 00000 n \n"
-        b"0000000115 00000 n \n"
-        b"trailer<</Size 4/Root 1 0 R>>\n"
-        b"startxref\n196\n%%EOF\n"
-    )
     file_name = "document_1.pdf"
     response_2 = user_1_client.post(
         "/project/1000/documents",
-        files={"file": (file_name, io.BytesIO(file_content), "application/pdf")},
+        files={"file": (file_name, io.BytesIO(PDF_CONTENT), "application/pdf")},
     )
 
     assert response_2.status_code == 404
 
 
-def test_get_project_documents_success(user_1_client):
+def test_get_project_documents_success(user_1_client, created_project_id):
     """Test that get project documents endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
-    file_content = (
-        b"%PDF-1.4\n"
-        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
-        b"2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
-        b"3 0 obj<</Type/Page/MediaBox[0 0 612 792]>>endobj\n"
-        b"xref\n0 4\n"
-        b"0000000000 65535 f \n"
-        b"0000000009 00000 n \n"
-        b"0000000058 00000 n \n"
-        b"0000000115 00000 n \n"
-        b"trailer<</Size 4/Root 1 0 R>>\n"
-        b"startxref\n196\n%%EOF\n"
-    )
     file_name = "document_1.pdf"
     response_2 = user_1_client.post(
-        f"/project/{id}/documents",
-        files={"file": (file_name, io.BytesIO(file_content), "application/pdf")},
+        f"/project/{created_project_id}/documents",
+        files={"file": (file_name, io.BytesIO(PDF_CONTENT), "application/pdf")},
     )
 
     assert response_2.is_success
 
-    response_3 = user_1_client.get(f"/project/{id}/documents")
+    response_3 = user_1_client.get(f"/project/{created_project_id}/documents")
 
     assert response_3.is_success
     assert isinstance(response_3.json(), list)
 
 
-def test_get_project_documents_success_no_documents(user_1_client):
+def test_get_project_documents_success_no_documents(user_1_client, created_project_id):
     """Test that get project documents endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
-    response_2 = user_1_client.get(f"/project/{id}/documents")
+    response_2 = user_1_client.get(f"/project/{created_project_id}/documents")
 
     assert response_2.status_code == 404
 
@@ -344,49 +263,29 @@ def test_get_project_documents_not_found(user_1_client):
     assert response.status_code == 404
 
 
-def test_invite_user_to_project_success(user_1_client, user_2_info):
+def test_invite_user_to_project_success(user_1_client, user_2_info, created_project_id):
     """Test that invite user to project endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
     response_2 = user_1_client.post(
-        f"/project/{id}/invite",
+        f"/project/{created_project_id}/invite",
         params={"user_email": user_2_info["email"]},
     )
 
     assert response_2.is_success
 
 
-def test_invite_user_to_project_is_already_in_project(user_1_client, user_2_info):
+def test_invite_user_to_project_is_already_in_project(
+    user_1_client, user_2_info, created_project_id
+):
     """Test that invite user to project endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
     response_2 = user_1_client.post(
-        f"/project/{id}/invite",
+        f"/project/{created_project_id}/invite",
         params={"user_email": user_2_info["email"]},
     )
 
     assert response_2.is_success
 
     response_3 = user_1_client.post(
-        f"/project/{id}/invite",
+        f"/project/{created_project_id}/invite",
         params={"user_email": user_2_info["email"]},
     )
 
@@ -394,21 +293,10 @@ def test_invite_user_to_project_is_already_in_project(user_1_client, user_2_info
     assert response_3.json()["message"] == "User is already a member of the project"
 
 
-def test_invite_user_to_project_user_dont_exists(user_1_client):
+def test_invite_user_to_project_user_dont_exists(user_1_client, created_project_id):
     """Test that invite user to project endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
     response_2 = user_1_client.post(
-        f"/project/{id}/invite",
+        f"/project/{created_project_id}/invite",
         params={"user_email": "non_existent_user@example.com"},
     )
 
@@ -426,28 +314,19 @@ def test_invite_user_to_project_dont_exists(user_1_client):
     assert response.status_code == 404
 
 
-def test_invite_user_to_project_not_owner(user_1_client, user_2_info, user_2_client):
+def test_invite_user_to_project_not_owner(
+    user_1_client, user_2_info, user_2_client, created_project_id
+):
     """Test that invite user to project endpoint works with valid credentials"""
-    name = "Super project"
-    description = "A super project"
-
-    response = user_1_client.post(
-        "/projects",
-        json={"name": name, "description": description},
-    )
-
-    assert response.is_success
-    id = response.json()["message"].split("ID: ")[1]
-
     response_2 = user_1_client.post(
-        f"/project/{id}/invite",
+        f"/project/{created_project_id}/invite",
         params={"user_email": user_2_info["email"]},
     )
 
     assert response_2.is_success
 
     response_3 = user_2_client.post(
-        f"/project/{id}/invite",
+        f"/project/{created_project_id}/invite",
         params={"user_email": "non_existent_user@example.com"},
     )
 
