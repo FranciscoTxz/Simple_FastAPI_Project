@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.user_project_model import UserProject
@@ -29,7 +30,9 @@ class UserProjectCRUD:
         return user_projects
 
     @staticmethod
-    async def is_project_from_user(db: AsyncSession, user_email: str, project_id: int):
+    async def is_project_from_user(
+        db: AsyncSession, user_email: str, project_id: int, check: bool = True
+    ):
         result = await db.execute(
             select(UserProject)
             .options(selectinload(UserProject.project))
@@ -38,4 +41,7 @@ class UserProjectCRUD:
                 UserProject.project_id == project_id,
             )
         )
-        return result.scalars().first()
+        user_project = result.scalars().first()
+        if not user_project and check:
+            raise HTTPException(status_code=404, detail="Project not found")
+        return user_project

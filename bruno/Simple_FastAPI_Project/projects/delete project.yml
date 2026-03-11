@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: "{{URL}}/project/2"
+  url: "{{URL}}/project/1"
   headers:
     - name: authorization
       value: "{{TOKEN}}"

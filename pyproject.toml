@@ -16,6 +16,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pre-commit>=4.5.1",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
@@ -24,3 +25,10 @@ dev = [
     "ruff>=0.15.5",
     "testcontainers>=4.14.1",
 ]
+
+[tool.coverage.run]
+source = ["src"]
+concurrency = ["thread", "greenlet"]
+
+[tool.coverage.report]
+show_missing = true
