@@ -1,4 +1,7 @@
 [run]
+concurrency =
+    thread
+    greenlet
 omit =
     */__init__.py
     */tests/*

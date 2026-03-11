@@ -11,10 +11,6 @@ from commons.constants import SECRET_KEY
 class UserService:
     @staticmethod
     async def signup_user(user: UserCreate, db: AsyncSession):
-        if not user.email or not user.password:
-            raise HTTPException(
-                status_code=400, detail="Email and password are required"
-            )
         db_user = await UserCRUD.get_user_by_email(db, email=user.email)
         if db_user:
             raise HTTPException(status_code=400, detail="Email already registered")
@@ -24,10 +20,6 @@ class UserService:
 
     @staticmethod
     async def login_user(user: UserCreate, response: Response, db: AsyncSession):
-        if not user.email or not user.password:
-            raise HTTPException(
-                status_code=400, detail="Email and password are required"
-            )
         db_user = await UserCRUD.get_user_by_email(db, email=user.email)
         if db_user is None:
             raise HTTPException(status_code=400, detail="Invalid email or password")
