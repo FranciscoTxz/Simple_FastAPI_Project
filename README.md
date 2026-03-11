@@ -50,6 +50,13 @@ docker compose up --build
 Open the `bruno/Simple_FastAPI_Project` on bruno API Client and use the collection.
 Download Bruno API Client: [Download Bruno API Client](https://www.usebruno.com/downloads)
 
+## Tests
+
+Run tests
+```bash
+uv run pytest
+```
 
 ## API Documentation
-...
+
+Open the API documentation [here](src/openapi.json)

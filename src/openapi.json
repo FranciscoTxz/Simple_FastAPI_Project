@@ -1,0 +1,707 @@
+{
+  "info": {
+    "title": "Simple FastAPI Project",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/": {
+      "get": {
+        "description": "Returns Hello World.",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Read Root"
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login_user_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "password": {
+                    "maxLength": 16,
+                    "minLength": 8,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "access_token": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "access_token"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Login User",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "operationId": "signup_user_auth_signup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "password": {
+                    "maxLength": 16,
+                    "minLength": 8,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "summary": "Signup User",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/document/{document_id}": {
+      "delete": {
+        "operationId": "delete_document_document_document_id_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Delete Document",
+        "tags": [
+          "document"
+        ]
+      },
+      "get": {
+        "operationId": "get_document_document_document_id_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "content",
+                    "created_at"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Document",
+        "tags": [
+          "document"
+        ]
+      },
+      "put": {
+        "operationId": "update_document_document_document_id_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "content",
+                    "created_at"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Update Document",
+        "tags": [
+          "document"
+        ]
+      }
+    },
+    "/project/{project_id}": {
+      "delete": {
+        "operationId": "delete_project_project_project_id_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Delete Project",
+        "tags": [
+          "project"
+        ]
+      }
+    },
+    "/project/{project_id}/documents": {
+      "get": {
+        "operationId": "get_project_documents_project_project_id_documents_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "properties": {
+                      "created_at": {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "created_at"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Project Documents",
+        "tags": [
+          "project"
+        ]
+      },
+      "post": {
+        "operationId": "create_project_document_project_project_id_documents_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "content",
+                    "created_at"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "summary": "Create Project Document",
+        "tags": [
+          "project"
+        ]
+      }
+    },
+    "/project/{project_id}/info": {
+      "get": {
+        "operationId": "get_project_info_project_project_id_info_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "created_at"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Project Info",
+        "tags": [
+          "project"
+        ]
+      },
+      "put": {
+        "operationId": "update_project_project_project_id_info_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "description": {
+                    "maxLength": 200,
+                    "minLength": 2,
+                    "type": "string"
+                  },
+                  "name": {
+                    "maxLength": 50,
+                    "minLength": 2,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "description": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "description"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Update Project",
+        "tags": [
+          "project"
+        ]
+      }
+    },
+    "/project/{project_id}/invite": {
+      "post": {
+        "operationId": "invite_user_to_project_project_project_id_invite_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "user_email",
+            "required": true,
+            "schema": {
+              "format": "email",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Invite User To Project",
+        "tags": [
+          "project"
+        ]
+      }
+    },
+    "/projects": {
+      "get": {
+        "operationId": "get_projects_projects_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "properties": {
+                      "is_owner": {
+                        "type": "boolean"
+                      },
+                      "project": {
+                        "properties": {
+                          "created_at": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "description",
+                          "created_at"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "is_owner",
+                      "project"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Projects",
+        "tags": [
+          "projects"
+        ]
+      },
+      "post": {
+        "operationId": "create_project_projects_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "description": {
+                    "maxLength": 200,
+                    "minLength": 2,
+                    "type": "string"
+                  },
+                  "name": {
+                    "maxLength": 50,
+                    "minLength": 2,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "summary": "Create Project",
+        "tags": [
+          "projects"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": []
+}

@@ -1,3 +1,4 @@
+from pydantic import EmailStr
 import base64
 from fastapi import Depends, APIRouter, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -107,8 +108,8 @@ async def create_project_document(
 )
 async def invite_user_to_project(
     project_id: int,
-    user_id: int,
+    user_email: EmailStr,
     user: User = Depends(authentication_user),
     db: AsyncSession = Depends(DatabaseConnection().get_session),
 ):
-    return await ProjectService.invite_user_to_project(project_id, user_id, user, db)
+    return await ProjectService.invite_user_to_project(project_id, user_email, user, db)

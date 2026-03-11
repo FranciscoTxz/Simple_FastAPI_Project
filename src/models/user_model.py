@@ -10,7 +10,8 @@ if TYPE_CHECKING:
 
 class User(DatabaseConnection().get_base()):
     __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    email: Mapped[str] = mapped_column(
+        String, primary_key=True, index=True, nullable=False
+    )
     password: Mapped[str] = mapped_column(String, nullable=False)
     projects_access: Mapped[list["UserProject"]] = relationship(back_populates="user")

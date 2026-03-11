@@ -16,7 +16,7 @@ from crud.user_crud import UserCRUD
 class ProjectService:
     @staticmethod
     async def get_projects(user: User, db: AsyncSession):
-        db_projects = await UserProjectCRUD.get_user_projects(db, user.id)
+        db_projects = await UserProjectCRUD.get_user_projects(db, user.email)
         if not db_projects:
             raise HTTPException(
                 status_code=404, detail="No projects found for the user"
@@ -29,10 +29,6 @@ class ProjectService:
         user: User,
         db: AsyncSession,
     ):
-        if not project.name or not project.description:
-            raise HTTPException(
-                status_code=400, detail="Name and description are required"
-            )
         db_project = await ProjectCRUD.get_project_by_name(db, name=project.name)
         if db_project:
             raise HTTPException(status_code=400, detail="Project already exists")
@@ -41,18 +37,18 @@ class ProjectService:
         await UserProjectCRUD.create_user_project(
             db,
             UserProjectCreate(
-                user_id=user.id, project_id=project_resp.id, is_owner=True
+                user_email=user.email, project_id=project_resp.id, is_owner=True
             ),
         )
         return {
-            "message": f"Project created by {user.name}, Project Name: {project_resp.name}, ID: {project_resp.id}"
+            "message": f"Project created by {user.email}, Project Name: {project_resp.name}, ID: {project_resp.id}"
         }
 
     @staticmethod
     async def get_project_info(project_id: int, user: User, db: AsyncSession):
-        db_project = await UserProjectCRUD.is_project_from_user(db, user.id, project_id)
-        if not db_project:
-            raise HTTPException(status_code=404, detail="Project not found")
+        db_project = await UserProjectCRUD.is_project_from_user(
+            db, user.email, project_id
+        )
         return db_project.project
 
     @staticmethod
@@ -60,47 +56,32 @@ class ProjectService:
         project_id: int, project: ProjectUpdate, user: User, db: AsyncSession
     ):
         db_user_project = await UserProjectCRUD.is_project_from_user(
-            db, user.id, project_id
+            db, user.email, project_id
         )
-        if not db_user_project or not db_user_project.is_owner:
+        if not db_user_project.is_owner:
             raise HTTPException(status_code=404, detail="Project not found")
         updated_project = await ProjectCRUD.update_project(
             db, project_id, name=project.name, description=project.description
         )
-        if not updated_project:
-            raise HTTPException(status_code=404, detail="Project not found")
         return updated_project
 
     @staticmethod
     async def delete_project(project_id: int, user: User, db: AsyncSession):
         db_user_project = await UserProjectCRUD.is_project_from_user(
-            db, user.id, project_id
+            db, user.email, project_id
         )
-        if not db_user_project or not db_user_project.is_owner:
+        if not db_user_project.is_owner:
             raise HTTPException(status_code=404, detail="Project not found")
-        deleted_project = await ProjectCRUD.delete_project(db, project_id)
-        if not deleted_project:
-            raise HTTPException(status_code=404, detail="Project not found")
+        await ProjectCRUD.delete_project(db, project_id)
         return
 
     @staticmethod
     async def get_project_documents(project_id: int, user: User, db: AsyncSession):
-        try:
-            db_user_project = await UserProjectCRUD.is_project_from_user(
-                db, user.id, project_id
-            )
-            if not db_user_project:
-                raise HTTPException(status_code=404, detail="Project not found")
-            documents = await DocumentCRUD.get_documents_by_project(db, project_id)
-            if not documents:
-                raise HTTPException(
-                    status_code=404, detail="No documents found for project"
-                )
-        except HTTPException:
-            raise
-        except Exception as e:
+        await UserProjectCRUD.is_project_from_user(db, user.email, project_id)
+        documents = await DocumentCRUD.get_documents_by_project(db, project_id)
+        if not documents:
             raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve documents: {str(e)}"
+                status_code=404, detail="No documents found for project"
             )
         return documents
 
@@ -108,42 +89,27 @@ class ProjectService:
     async def create_project_document(
         project_id: int, file: FileSerializer, user: User, db: AsyncSession
     ):
-        try:
-            db_user_project = await UserProjectCRUD.is_project_from_user(
-                db, user.id, project_id
-            )
-            if not db_user_project:
-                raise HTTPException(status_code=404, detail="Project not found")
+        await UserProjectCRUD.is_project_from_user(db, user.email, project_id)
 
-            new_document = await DocumentCRUD.create_document(
-                db, project_id, file.file_name, file.file_content_base64
-            )
-            if not new_document:
-                raise HTTPException(status_code=500, detail="Failed to create document")
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Failed to create document: {str(e)}"
-            )
+        new_document = await DocumentCRUD.create_document(
+            db, project_id, file.file_name, file.file_content_base64
+        )
         return new_document
 
     @staticmethod
     async def invite_user_to_project(
-        project_id: int, user_id: int, user: User, db: AsyncSession
+        project_id: int, user_email: str, user: User, db: AsyncSession
     ):
-        if not user_id:
-            raise HTTPException(status_code=400, detail="User ID is required to invite")
         db_user_project = await UserProjectCRUD.is_project_from_user(
-            db, user.id, project_id
+            db, user.email, project_id
         )
-        db_user = await UserCRUD.get_user_by_id(db, user_id)
+        if not db_user_project.is_owner:
+            raise HTTPException(status_code=404, detail="Project not found")
+        db_user = await UserCRUD.get_user_by_email(db, user_email)
         if db_user is None:
             raise HTTPException(status_code=404, detail="User to invite not found")
-        if not db_user_project or not db_user_project.is_owner:
-            raise HTTPException(status_code=404, detail="Project not found")
         db_user_invited_project = await UserProjectCRUD.is_project_from_user(
-            db, user_id, project_id
+            db, user_email, project_id, check=False
         )
         if db_user_invited_project:
             raise HTTPException(
@@ -152,9 +118,9 @@ class ProjectService:
         await UserProjectCRUD.create_user_project(
             db,
             user_project=UserProjectCreate(
-                user_id=user_id, project_id=project_id, is_owner=False
+                user_email=user_email, project_id=project_id, is_owner=False
             ),
         )
         return {
-            "message": f"User with ID {user_id} invited to project {project_id} successfully"
+            "message": f"User with ID {user_email} invited to project {project_id} successfully"
         }

@@ -1,10 +1,10 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 from schemas.project_schema import Project
 
 
 class UserProjectBase(BaseModel):
-    user_id: int
+    user_email: EmailStr
     project_id: int
     is_owner: bool = False
 
